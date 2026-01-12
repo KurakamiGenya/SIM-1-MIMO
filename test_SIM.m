@@ -96,7 +96,7 @@ for ii = 1:Max_L
         G = sqrt(pathloss)*(Corr_R)^(1/2)*G_independent*(Corr_T)^(1/2); %% HMIMO channel
         [G_left, G_svd, G_right] = svd(G); %% SVD of HMIMO channel
         H_true = G_svd(1:S,1:S); %% Target channel
-        H_true_vec = vec(H_true);
+        H_true_vec = H_true(:); %% Convert to column vector
         Norm_H = norm(H_true_vec)^2; %% Norm of the target end-to-end channel
         h_diag = diag(H_true);
         %% Power allocation using water-filling algorithm
@@ -122,7 +122,7 @@ for ii = 1:Max_L
                 Q = Q*U_R*diag(phase_receive(:,k+1));
             end
             H_SIM = Q*G*P; %% Practical SIM-aided end-to-end channel
-            H_SIM_vec = vec(H_SIM);
+            H_SIM_vec = H_SIM(:); %% Convert to column vector
             Factor = (H_SIM_vec'*H_SIM_vec)\H_SIM_vec'*H_true_vec; %% Compensation factor
             Error_old_set(tt) = norm(Factor*H_SIM_vec-H_true_vec)^2/Norm_H; %% Error
             phase_transmit_set(:,:,tt) = phase_transmit;
@@ -146,7 +146,7 @@ for ii = 1:Max_L
             Q = Q*U_R*diag(phase_receive(:,k+1));
         end
         H_SIM = Q*G*P; %% The end-to-end channel including TX-SIM and RX-SIM
-        H_SIM_vec = vec(H_SIM);
+        H_SIM_vec = H_SIM(:); %% Convert to column vector
         Factor = (H_SIM_vec'*H_SIM_vec)\H_SIM_vec'*H_true_vec; %% Compensation factor
         step = 0.1; %% learning rate
         Error_new = 10000; %% A preset value as large as possible
@@ -205,7 +205,7 @@ for ii = 1:Max_L
                 Q = Q*U_R*diag(phase_receive(:,k+1));
             end
             H_SIM = Q*G*P; %% The end-to-end channel including TX-SIM and RX-SIM
-            H_SIM_vec = vec(H_SIM);
+            H_SIM_vec = H_SIM(:); %% Convert to column vector
             Factor = (H_SIM_vec'*H_SIM_vec)\H_SIM_vec'*H_true_vec; %% Compensation factor
             Error_old = Error_new;
             Error_new = norm(Factor*H_SIM-H_true)^2/Norm_H; %% Update residual error
