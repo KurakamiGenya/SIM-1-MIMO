@@ -13,14 +13,14 @@ You are an expert in optimization algorithms and MATLAB programming. Help me imp
 
 I have an optimization problem with the following characteristics:
 
-**System to Optimize**: {{SYSTEM_NAME}}
-- Problem dimension: {{DIMENSION}} (example: 1000-2000 variables)
-- Variable type: {{VARIABLE_TYPE}} (example: phase angles θ ∈ [-π, π])
-- Objective: {{OBJECTIVE}} (example: Maximize spectral efficiency)
+**System to Optimize**: Stacked Intelligent Metasurfaces (SIM) for MIMO precoding
+- Problem dimension: 1100-2000 variables (100×L + 100×K, where L=1-10 TX layers, K=10 RX layers)
+- Variable type: Phase angles θ ∈ [-π, π] for metasurface elements
+- Objective: Maximize spectral efficiency (Sum Rate in bits/s/Hz)
 
-**Baseline Algorithm**: {{BASELINE_NAME}}
-- Current implementation: {{BASELINE_FILE}}
-- Performance metrics: {{BASELINE_METRICS}}
+**Baseline Algorithm**: Gradient Descent with Random Initialization
+- Current implementation: test_SIM.m
+- Performance metrics: NMSE (Normalized Mean Square Error), Capacity (Sum Rate), Convergence speed
 
 ## Implementation Requirements
 
@@ -44,7 +44,7 @@ Where:
 
 ### 3. Code Structure
 Create these files:
-- **Main implementation**: `{{PREFIX}}_PSO.m` - Full optimization with all layers/scenarios
+- **Main implementation**: `test_SIM_PSO.m` - Full optimization with all layers/scenarios
 - **Quick demo**: `demo_PSO.m` - Faster version for testing
 - **Comparison script**: `compare_results.m` - Compare PSO vs baseline
 - **Documentation**: `PSO_README.md` - Detailed explanation
@@ -100,17 +100,3 @@ Compare PSO with baseline algorithm on:
 - Provide concrete examples and visualizations
 - Fix issues immediately when they arise
 - Give clear step-by-step instructions for running code
-
----
-
-## Template Variables
-
-Fill in these before using:
-- `{{SYSTEM_NAME}}`: Name of system being optimized
-- `{{DIMENSION}}`: Number of variables/dimension
-- `{{VARIABLE_TYPE}}`: Type of variables (continuous, discrete, angles, etc.)
-- `{{OBJECTIVE}}`: What to maximize or minimize
-- `{{BASELINE_NAME}}`: Name of comparison algorithm
-- `{{BASELINE_FILE}}`: Filename of baseline implementation
-- `{{BASELINE_METRICS}}`: Key performance metrics
-- `{{PREFIX}}`: Prefix for generated files
