@@ -2,6 +2,19 @@ clc;
 clearvars;
 close all;
 
+%% Start execution timer
+algorithm_start_time = tic;
+
+%% Algorithm Header
+fprintf('\n');
+fprintf('╔════════════════════════════════════════╗\n');
+fprintf('║       STANDARD PSO ALGORITHM           ║\n');
+fprintf('╚════════════════════════════════════════╝\n');
+fprintf('Status: RUNNING...\n');
+fprintf('Method: Particle Swarm Optimization\n');
+fprintf('Parameters: w=0.7 (constant inertia)\n');
+fprintf('----------------------------------------\n\n');
+
 %% System Parameters
 Thickness = 0.05; %% Thickness of TX-SIM and RX-SIM
 Pt = 10^(20/10); %% Transmit power
@@ -151,6 +164,13 @@ for ii = 1:Max_L
         end
         
         %% PSO Main Loop
+        % Initialize convergence tracking for L=Max_L
+        if L == Max_L && jj == MonteCarlo
+            convergence_history = zeros(max_iterations, 1);
+            convergence_time = zeros(max_iterations, 1);  % Track elapsed time
+            convergence_start_time = tic;  % Start timer for convergence tracking
+        end
+        
         for iter = 1:max_iterations
             for p = 1:num_particles
                 % Update velocity using Standard PSO formula
@@ -183,6 +203,12 @@ for ii = 1:Max_L
                     gBest_fitness = fitness;
                     gBest = particles(p,:);
                 end
+            end
+            
+            % Track convergence for L=Max_L
+            if L == Max_L && jj == MonteCarlo
+                convergence_history(iter) = gBest_fitness;
+                convergence_time(iter) = toc(convergence_start_time);  % Time since PSO loop started
             end
             
             % Display progress
@@ -232,6 +258,18 @@ for ii = 1:Max_L
     Capacity_average(ii) = mean(Capacity);
     toc
 end
+
+%% Save convergence history for plotting
+if exist('convergence_history', 'var')
+    save('PSO_convergence.mat', 'convergence_history', 'convergence_time');
+    fprintf('\nConvergence history saved to PSO_convergence.mat\n');
+end
+
+%% Save execution time
+algorithm_execution_time = toc(algorithm_start_time);
+save('PSO_execution_time.mat', 'algorithm_execution_time');
+fprintf('Execution time: %.2f seconds (%.2f minutes)\n', algorithm_execution_time, algorithm_execution_time/60);
+fprintf('Execution time saved to PSO_execution_time.mat\n');
 
 %% Plot Results
 figure;

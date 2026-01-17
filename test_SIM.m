@@ -1,6 +1,20 @@
 clc;
 clearvars;
 close all;
+
+%% Start execution timer
+algorithm_start_time = tic;
+
+%% Algorithm Header
+fprintf('\n');
+fprintf('╔════════════════════════════════════════╗\n');
+fprintf('║      GRADIENT DESCENT ALGORITHM        ║\n');
+fprintf('╚════════════════════════════════════════╝\n');
+fprintf('Status: RUNNING...\n');
+fprintf('Method: Gradient-based phase optimization\n');
+fprintf('----------------------------------------\n\n');
+
+%% System Parameters
 Thickness = 0.05; %% Thickness of TX-SIM and RX-SIM
 Pt = 10^(20/10); %% Transmit power
 Sigma2 = 10^(-110/10); %% Average noise power at the receiver
@@ -150,6 +164,15 @@ for ii = 1:Max_L
         Factor = (H_SIM_vec'*H_SIM_vec)\H_SIM_vec'*H_true_vec; %% Compensation factor
         step = 0.1; %% learning rate
         Error_new = 10000; %% A preset value as large as possible
+        
+        %% Convergence tracking for L=Max_L
+        if L == Max_L && jj == MonteCarlo
+            convergence_history = [];
+            convergence_time = [];  % Track elapsed time
+            iter_count = 0;
+            convergence_start_time = tic;  % Start timer for convergence tracking
+        end
+        
         while abs(Error_new-Error_old) >= Error_old * 0.001
             %% Calculate partial derivative values associated with TX-SIM phase shifts Eq. (23)
             for ll = 1:L
@@ -209,6 +232,18 @@ for ii = 1:Max_L
             Factor = (H_SIM_vec'*H_SIM_vec)\H_SIM_vec'*H_true_vec; %% Compensation factor
             Error_old = Error_new;
             Error_new = norm(Factor*H_SIM-H_true)^2/Norm_H; %% Update residual error
+            
+            %% Track convergence for L=Max_L
+            if L == Max_L && jj == MonteCarlo
+                iter_count = iter_count + 1;
+                % Calculate current capacity
+                for pp = 1:S
+                    C_single_stream(pp) = log2(1+PA_WF(pp)*abs(Factor*H_SIM(pp,pp))^2/ ...
+                        (Sigma2+(abs(Factor*H_SIM(pp,:)).^2*PA_WF-PA_WF(pp)*abs(Factor*H_SIM(pp,pp))^2)));
+                end
+                convergence_history(iter_count) = sum(C_single_stream);
+                convergence_time(iter_count) = toc(convergence_start_time);  % Time since convergence loop started
+            end
         end
         NMSE(jj) = Error_new;
         for pp = 1:S
@@ -221,6 +256,18 @@ for ii = 1:Max_L
     Capacity_average(ii) = mean(Capacity); %% Ergodic capacity
     toc
 end
+
+%% Save convergence history for plotting
+if exist('convergence_history', 'var')
+    save('GD_convergence.mat', 'convergence_history', 'convergence_time');
+    fprintf('\nConvergence history saved to GD_convergence.mat\n');
+end
+
+%% Save execution time
+algorithm_execution_time = toc(algorithm_start_time);
+save('GD_execution_time.mat', 'algorithm_execution_time');
+fprintf('Execution time: %.2f seconds (%.2f minutes)\n', algorithm_execution_time, algorithm_execution_time/60);
+fprintf('Execution time saved to GD_execution_time.mat\n');
 figure
 imagesc(abs(Q*G*P))
 figure
